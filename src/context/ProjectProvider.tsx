@@ -8,11 +8,11 @@ interface ProjectContextType {
     currentProject: Project | null;
     isLoading: boolean;
     error: string | null;
-    createProject: (projectData: Omit<Project, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>) => Promise<Project>;
+    createProject: (name: string, description: string) => Promise<Project>;
     updateProject: (id: string, projectData: Partial<Project>) => Promise<Project>;
     getProject: (id: string) => Promise<Project>;
     deleteProject: (id: string) => Promise<void>;
-    getAllProjects: () => Promise<Project[]>;
+    getAllProjects: (tenantId: string) => Promise<Project[]>;
     setCurrentProject: (project: Project) => void;
 }
 
@@ -25,12 +25,24 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [error, setError] = useState<string | null>(null);
 
     const createProject = useCallback(
-        async (projectData: Omit<Project, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>) => {
+        async (name: string, description: string) => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await axios.post<Project>('/create-project', projectData);
-                setProjects(prev => [...prev, response.data]);
+                const response = await axios.post(
+                    'http://localhost:4000/api/v1/create-project',
+                    {
+                        name, description
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        withCredentials: true
+                    }
+                );
+
+                setProjects(prev => [...prev, response.data.data]);
                 return response.data;
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'An error occurred');
@@ -46,10 +58,16 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Project>('http://localhost:4000/api/v1/update-project', { id, ...projectData });
-            setProjects(prev => prev.map(p => (p.id === id ? response.data : p)));
+            const response = await axios.post('http://localhost:4000/api/v1/update-project', { id, ...projectData },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+            setProjects(prev => prev.map(p => (p.id === id ? response.data.data : p)));
             if (currentProject?.id === id) {
-                setCurrentProject(response.data);
+                setCurrentProject(response.data.data);
             }
             return response.data;
         } catch (err) {
@@ -64,8 +82,16 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Project>('http://localhost:4000/api/v1/get-project', { id });
-            setCurrentProject(response.data);
+            const response = await axios.post('http://localhost:4000/api/v1/get-project', { id },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+            // console.log(response.data);
+            setCurrentProject(response.data.data);
+            // console.log(currentProject);
             return response.data;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -79,7 +105,13 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             setIsLoading(true);
             setError(null);
-            await axios.post('/delete-project', { id });
+            await axios.post('http://localhost:4000/api/v1/delete-project', { id },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
             setProjects(prev => prev.filter(p => p.id !== id));
             if (currentProject?.id === id) {
                 setCurrentProject(null);
@@ -92,13 +124,19 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     }, [currentProject]);
 
-    const getAllProjects = useCallback(async () => {
+    const getAllProjects = useCallback(async (tenantId: string) => {
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Project[]>('http://localhost:4000/api/v1/get-all-projects');
-            setProjects(response.data);
-            return response.data;
+            console.log("tenantId", tenantId);
+            const response = await axios.post('http://localhost:4000/api/v1/get-all-projects', { tenantId }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            });
+            setProjects(response.data.data);
+            return response.data.data;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
             throw err;

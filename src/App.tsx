@@ -5,6 +5,8 @@ import { TenantProvider } from "./context/TenantProvider";
 import { ProjectProvider } from "./context/ProjectProvider";
 import SignupPage from "./components/Signup";
 import LoginPage from "./components/Login";
+import Dashboard from "./pages/Dashboard";
+import ProjectPage from "./components/ProjectPage";
 
 function App() {
   return (
@@ -21,13 +23,13 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <div>dashboard</div>
+                  <Dashboard />
                 }
               />
               <Route
                 path="/project/:id"
                 element={
-                  <div>project</div>
+                  <ProjectPage />
                 }
               />
               <Route

@@ -8,7 +8,7 @@ interface TenantContextType {
     isLoading: boolean;
     error: string | null;
     createTenant: (email: string, password: string, provider: string) => Promise<void>;
-    verifyTenant: (email: string, code: string) => Promise<void>;
+    verifyTenant: (email: string, otp: string) => Promise<void>;
     loginTenant: (email: string, password: string) => Promise<void>;
     logoutTenant: () => Promise<void>;
 }
@@ -24,9 +24,15 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Tenant>('http://localhost:4000/api/v1/create-tenant', { email, password, provider });
+            const response = await axios.post('http://localhost:4000/api/v1/create-tenant', { email, password, provider },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
             console.log(response.data);
-            setTenant(response.data);
+            // setTenant(response.data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
             throw err;
@@ -39,7 +45,14 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Tenant>('http://localhost:4000/api/v1/verify-tenant-verification', { email, otp });
+            const response = await axios.post('http://localhost:4000/api/v1/verify-tenant-verification', { email, otp },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+            console.log(response.data);
             setTenant(response.data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -53,8 +66,16 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         try {
             setIsLoading(true);
             setError(null);
-            const response = await axios.post<Tenant>('http://localhost:4000/api/v1/login-tenant', { email, password });
-            setTenant(response.data);
+            const response = await axios.post('http://localhost:4000/api/v1/login-tenant', { email, password },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+            // console.log(response.data);
+            setTenant(response.data.data);
+            console.log(tenant)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
             throw err;
