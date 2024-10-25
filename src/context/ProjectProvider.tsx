@@ -6,6 +6,7 @@ import { Project } from '@/lib/types';
 interface ProjectContextType {
     projects: Project[];
     currentProject: Project | null;
+    currentUsers: any[];
     isLoading: boolean;
     error: string | null;
     createProject: (name: string, description: string) => Promise<Project>;
@@ -22,6 +23,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [projects, setProjects] = useState<Project[]>([]);
     const [currentProject, setCurrentProject] = useState<Project | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [currentUsers, setCurrentUsers] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     const createProject = useCallback(
@@ -89,8 +91,9 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
                     },
                     withCredentials: true
                 });
-            // console.log(response.data);
-            setCurrentProject(response.data.data);
+            console.log(response.data);
+            setCurrentProject(response.data.data.project);
+            setCurrentUsers(response.data.data.users);
             // console.log(currentProject);
             return response.data;
         } catch (err) {
@@ -148,6 +151,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     const value = {
         projects,
         currentProject,
+        currentUsers,
         isLoading,
         error,
         createProject,

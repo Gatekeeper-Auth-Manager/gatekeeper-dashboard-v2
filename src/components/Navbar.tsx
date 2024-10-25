@@ -8,13 +8,10 @@ export default function Navbar() {
                 <span className="ml-2 text-2xl font-bold text-blue-900">Gatekeeper</span>
             </a>
             <nav className="ml-auto flex gap-4 sm:gap-6">
-                <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="#features">
+                <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="/features">
                     Features
                 </a>
-                <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="#pricing">
-                    Pricing
-                </a>
-                <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="#docs">
+                <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="/docs">
                     Docs
                 </a>
                 <a className="text-sm font-medium hover:underline underline-offset-4 text-blue-800" href="/login">

@@ -14,7 +14,7 @@ const ProjectPage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [showSecret, setShowSecret] = useState(false)
     const { id } = useParams()
-    const { currentProject, getProject, updateProject, deleteProject } = useProject()
+    const { currentProject, currentUsers, getProject, updateProject, deleteProject } = useProject()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -221,7 +221,7 @@ const ProjectPage = () => {
                     </Tabs>
                     <div className="mt-8">
                         <h3 className="text-lg font-semibold text-blue-900 mb-4">Users</h3>
-                        <UserTable initUsers={currentProject?.users || []} />
+                        <UserTable initUsers={currentUsers || []} />
                     </div>
                 </CardContent>
             </Card>

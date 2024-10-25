@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -11,20 +9,29 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MoreHorizontal, Trash, UserCog } from 'lucide-react'
 
-import { UserCredential } from '@/lib/types'
+interface UserCredential {
+    userId: string
+    email: string
+    userName: string
+    createdAt: string
+    updatedAt: string
+    projectId: string
+    isVerified: boolean
+    role: string
+}
 
 export default function UserTable({ initUsers }: { initUsers: UserCredential[] }) {
     const [users, setUsers] = useState(initUsers)
     const [searchTerm, setSearchTerm] = useState('')
     const [userToDelete, setUserToDelete] = useState<UserCredential | null>(null)
 
-    const filteredUsers = users?.filter(user =>
+    const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.userName?.toLowerCase().includes(searchTerm.toLowerCase())
+        (user.userName && user.userName.toLowerCase().includes(searchTerm.toLowerCase()))
     )
 
     const handleDeleteUser = (user: UserCredential) => {
-        setUsers(users?.filter(u => u.userId !== user.userId))
+        setUsers(users.filter(u => u.userId !== user.userId))
         setUserToDelete(null)
     }
 
@@ -36,67 +43,76 @@ export default function UserTable({ initUsers }: { initUsers: UserCredential[] }
 
     return (
         <div className="container mx-auto py-10">
-            <h1 className="text-2xl font-bold mb-4 text-blue-900">User Credentials</h1>
-            <Input
-                type="text"
-                placeholder="Search by email or username"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="mb-4 border-blue-200 focus:border-blue-400"
-            />
-            <div className="rounded-md border border-blue-200 overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                <div className="w-1/3">
+                    <Input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="max-w-sm"
+                    />
+                </div>
+            </div>
+
+            <div className="rounded-lg border bg-card">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-blue-50">
-                            <TableHead className="text-blue-800">Email</TableHead>
-                            <TableHead className="text-blue-800">Username</TableHead>
-                            <TableHead className="text-blue-800">Created At</TableHead>
-                            <TableHead className="text-blue-800">Verified</TableHead>
-                            <TableHead className="text-blue-800">Role</TableHead>
-                            <TableHead className="text-right text-blue-800">Actions</TableHead>
+                        <TableRow className="bg-gray-50">
+                            <TableHead className="w-[250px]">Email</TableHead>
+                            <TableHead className="w-[200px]">Username</TableHead>
+                            <TableHead className="w-[150px]">Created</TableHead>
+                            <TableHead className="w-[100px]">Status</TableHead>
+                            <TableHead className="w-[100px]">Role</TableHead>
+                            <TableHead className="w-[100px] text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredUsers?.map((user) => (
-                            <TableRow key={user.userId} className="hover:bg-blue-50">
-                                <TableCell className="text-blue-700">{user.email}</TableCell>
-                                <TableCell className="text-blue-700">{user.userName || 'N/A'}</TableCell>
-                                <TableCell className="text-blue-700">{format(new Date(user.createdAt), 'PP')}</TableCell>
+                        {filteredUsers.map((user) => (
+                            <TableRow key={user.userId}>
+                                <TableCell className="font-medium">{user.email}</TableCell>
+                                <TableCell>{user.userName || '-'}</TableCell>
+                                <TableCell>{format(new Date(user.createdAt), 'MMM d, yyyy')}</TableCell>
                                 <TableCell>
-                                    <Badge variant={user.isVerified ? "default" : "destructive"} className={user.isVerified ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}>
-                                        {user.isVerified ? 'Verified' : 'Not Verified'}
+                                    <Badge variant={user.isVerified ? "default" : "destructive"}>
+                                        {user.isVerified ? 'Verified' : 'Pending'}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-blue-700">{user.role || 'N/A'}</TableCell>
+                                <TableCell className="capitalize">{user.role}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-100">
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
                                                 <span className="sr-only">Open menu</span>
                                                 <MoreHorizontal className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="bg-white border-blue-200">
-                                            <DropdownMenuItem onSelect={() => setUserToDelete(user)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                                                <Trash className="mr-2 h-4 w-4" />
-                                                <span>Delete</span>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem
+                                                className="flex items-center"
+                                                onSelect={() => setUserToDelete(user)}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4 text-red-500" />
+                                                Delete User
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                                                <UserCog className="mr-2 h-4 w-4" />
-                                                <span>Update Role</span>
-                                                <Select
-                                                    onValueChange={(value) => handleUpdateRole(user.userId, value)}
-                                                    defaultValue={user.role || undefined}
-                                                >
-                                                    <SelectTrigger className="w-[180px] ml-2 border-blue-200">
-                                                        <SelectValue placeholder="Select a role" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="user">User</SelectItem>
-                                                        <SelectItem value="admin">Admin</SelectItem>
-                                                        <SelectItem value="moderator">Moderator</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                            <DropdownMenuItem>
+                                                <div className="flex items-center">
+                                                    <UserCog className="mr-2 h-4 w-4" />
+                                                    <Select
+                                                        onValueChange={(value) => handleUpdateRole(user.userId, value)}
+                                                        defaultValue={user.role}
+                                                    >
+                                                        <SelectTrigger className="w-[130px]">
+                                                            <SelectValue placeholder="Select role" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="user">User</SelectItem>
+                                                            <SelectItem value="admin">Admin</SelectItem>
+                                                            <SelectItem value="moderator">Moderator</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -108,17 +124,21 @@ export default function UserTable({ initUsers }: { initUsers: UserCredential[] }
             </div>
 
             <Dialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
-                <DialogContent className="bg-white">
+                <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className="text-blue-900">Are you sure you want to delete this user?</DialogTitle>
-                        <DialogDescription className="text-blue-700">
-                            This action cannot be undone. This will permanently delete the user
-                            account and remove their data from our servers.
+                        <DialogTitle>Delete User</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete {userToDelete?.email}? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setUserToDelete(null)} className="border-blue-200 text-blue-600 hover:bg-blue-50">Cancel</Button>
-                        <Button variant="destructive" onClick={() => userToDelete && handleDeleteUser(userToDelete)} className="bg-red-600 hover:bg-red-700">
+                        <Button variant="outline" onClick={() => setUserToDelete(null)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => userToDelete && handleDeleteUser(userToDelete)}
+                        >
                             Delete
                         </Button>
                     </DialogFooter>

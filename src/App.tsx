@@ -7,6 +7,8 @@ import SignupPage from "./components/Signup";
 import LoginPage from "./components/Login";
 import Dashboard from "./pages/Dashboard";
 import ProjectPage from "./components/ProjectPage";
+import Docs from "./pages/Docs";
+import FeaturesPage from "./pages/Features";
 
 function App() {
   return (
@@ -32,6 +34,12 @@ function App() {
                   <ProjectPage />
                 }
               />
+              <Route path="/docs" element={
+                <Docs />
+              } />
+              <Route path="/features" element={
+                <FeaturesPage />
+              } />
               <Route
                 path="/test"
                 element={
